@@ -21,15 +21,16 @@ remains unchanged and industry-independent. The earlier HAIP mapping collection
 is neither a dependency nor the boundary of this work. The cold-chain PoC is one
 separate executable instantiation of the generic bridge.
 
-> **Revision status — 10 October 2026:** Python tests and integration with the
-> exact pinned public PoC source were executed successfully on synthetic data.
-> **This new Lean revision has not yet been compiled in the preparation
-> environment: Lean/Lake were unavailable and could not be retrieved.** Its
-> declaration/proof source is supplied for verification, not represented as an
-> already machine-checked result. An older green badge does not verify these
-> additions. After publishing, check the workflow result for the exact new commit.
+> **Verification status — 10 October 2026:** GitHub Actions
+> `Lean verification / verify` passed for commit `dc67c7b`.
+> The workflow successfully built and checked `EUAIActMapping.lean`
+> with Lean 4.26.0, passed all 18 Python tests, verified the pinned
+> public PoC source, and completed the concrete PoC-to-Lean
+> correspondence check.
+> These results apply to the verified commit and do not establish
+> full EU AI Act compliance or production-system safety.
 
-This is a private technical proposal. It is not an official G7/HAIP project,
+This is an independent technical proposal. It is not an official G7/HAIP project,
 Japanese-government/OECD/EU approval, an AISI-adopted standard, a conformity
 assessment, or a claim that implementing HAIP automatically satisfies EU law.
 
@@ -54,7 +55,7 @@ Source technical profile ── named shared obligations ──► Target techni
                  → optional concrete-run Lean correspondence check
 ```
 
-For the **new repository**, upload the following six files, preserving their paths:
+The published repository contains the following six files, preserving their paths:
 
 ```text
 EUAIActMapping.lean             # Original EU proofs + CrossFramework extension
@@ -253,13 +254,14 @@ This crosses three distinct levels:
 3. The optional concrete Lean check compares those normalized observations to
    the formal definitions for that run.
 
-Level 3 **has not been executed in the preparation environment**. Even after it
-passes, it is a concrete correspondence check, not a universal proof of the
-Python normalizer, the external PoC's floating-point calculations, hashing,
-sensor truth, human authority or a production runtime. Receipt hashes bind bytes;
-they are not signatures, authenticated timestamps, content provenance standards,
-or one-use execution tokens. The implementation performs no real shipment,
-actuator, external API or production-system write.
+Level 3 **passed in GitHub Actions for commit `dc67c7b`**.
+This is a concrete correspondence check, not a universal proof of the
+Python normalizer, the external PoC's floating-point calculations,
+hashing, sensor truth, human authority or a production runtime.
+Receipt hashes bind bytes; they are not signatures, authenticated
+timestamps, content provenance standards, or one-use execution tokens.
+The implementation performs no real shipment, actuator, external API
+or production-system write.
 
 ### Executed tests for this delivery
 
@@ -400,22 +402,24 @@ argument; the theorem does not silently cover a different transition function.
 
 ## GitHub setup — 日本語
 
-新規リポジトリ **`hiroshima-ai-process-eu-ai-act-bridge`** を作成し、上記6ファイルを
-構造を保って配置してください。特にワークフローの場所は
+リポジトリ **`hiroshima-ai-process-eu-ai-act-bridge`** は公開済みで、上記6ファイルを
+所定の構造で配置しています。ワークフローの場所は
 **`.github/workflows/lean.yml`** です。既存のKernelや既存リポジトリは
-書き換えません。新しい`lakefile.toml`はプロジェクト名だけ新規名称とし、
-Kernel/mathlibの版を従来どおり固定しています。ZIPは解凍してアップロードしてください。
+書き換えていません。`lakefile.toml`は新しいプロジェクト名を使用し、
+Kernel/mathlibの版を従来どおり固定しています。
 
 新しい横断保証は同じLeanファイル内の独立名前空間に追加しています。
 既存6条項の定義・証明は維持し、広島AIプロセスの公式文書を起点とした技術的解釈を
 責任OSに接続しています。従来の広島AIプロセス対応マッピングや、コールドチェーン
 という一つの業務に責任OSの対象範囲を限定する変更ではありません。
 
-**今回ここで実行確認できたのはPythonと既存PoCの接続です。Lean本体を利用できなかった
-ため、追加証明のコンパイルとPython→Leanの具体的照合は未実行です。**
-更新後の該当コミットで `Build mapping` と `Verify source with warnings as errors` が
-両方成功したことを確認してから、「Lean4で検証済み」と発信してください。
-過去の緑色バッジを新しいファイルの検証結果として扱わないでください。
+**2026年10月10日のGitHub Actions（コミット `dc67c7b`）において、
+Lean4のビルド、警告をエラー扱いとするソース検証、公開PoCのハッシュ検証、
+Pythonの18テスト、および実際のPoC結果とLean形式モデルの照合が
+すべて成功しました。**
+
+検証結果は当該コミットを対象とするものであり、
+EU AI Actへの全面準拠や実運用環境の安全性を証明するものではありません。
 
 ### Leanの検証
 
@@ -432,7 +436,6 @@ Actionsが有効なら、push・pull requestで新規リポジトリの `Lean ve
 新CIではLeanのビルドと厳格検証に加え、公開PoCの固定版の取得・ハッシュ検証、
 Python統合テスト、具体的なPoC結果とLeanの照合まで実施します。
 手動の場合は **Actions → Lean verification → Run workflow** です。
-本作業ではGitHubへのアップロード、コミット、Actionsの起動は行っていません。
 
 ### 単一Pythonファイルのテストと実PoC接続
 
@@ -485,8 +488,10 @@ Toolchain: leanprover/lean4:v4.26.0
 The new workflow builds and checks the entire application source with warnings
 as errors. It also runs Python model/integration tests with the exact public PoC
 source and checks concrete receipts against Lean. It does not perform a separate
-`#print axioms` audit or upload an audit report. These new checks have **not** been
-run on GitHub for this new repository at the time this package was prepared.
+`#print axioms` audit or upload an audit report. All workflow checks passed
+on GitHub Actions for commit `dc67c7b` on 10 October 2026. The verification
+result is available at:
+https://github.com/GhostDriftTheory/hiroshima-ai-process-eu-ai-act-bridge/actions/runs/38008866045
 The supplied extension contains no `sorry`, `admit`, new `axiom`, `unsafe`
 definition or `native_decide`. That source observation is not a substitute for
 compilation or a dependency-wide trust analysis.
