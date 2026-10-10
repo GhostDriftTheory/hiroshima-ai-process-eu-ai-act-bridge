@@ -1,0 +1,62 @@
+name: Lean verification
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Lean toolchain manager
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.2/elan-x86_64-unknown-linux-gnu.tar.gz \
+            | tar xz
+          ./elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned Lean dependencies
+        run: lake update
+
+      - name: Download mathlib cache
+        run: lake exe cache get
+
+      - name: Build EU / HAIP bridge
+        run: lake build EUAIActMapping
+
+      - name: Verify Lean source with warnings as errors
+        run: lake env lean -DwarningAsError=true EUAIActMapping.lean
+
+      - name: Fetch exact published cold-chain PoC source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            'https://raw.githubusercontent.com/GhostDriftTheory/coldchain-handoff-assurance/1437b21a41b4c2b8623e8ae22ad71db3ef330383/poc_handoff_pde.py' \
+            --output "$RUNNER_TEMP/poc_handoff_pde.py"
+          echo "4fc65615fd383d3491f4ad931da90b77e49188709a03e3d46195cebc4569919f  $RUNNER_TEMP/poc_handoff_pde.py" \
+            | sha256sum --check -
+
+      - name: Run Python model tests and actual PoC integration tests
+        run: python haip_eu_poc_bridge.py --self-test --poc "$RUNNER_TEMP/poc_handoff_pde.py"
+
+      - name: Check actual PoC receipts against Lean model
+        run: python haip_eu_poc_bridge.py --poc "$RUNNER_TEMP/poc_handoff_pde.py" --lean-project .
